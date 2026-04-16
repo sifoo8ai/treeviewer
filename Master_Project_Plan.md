@@ -75,3 +75,7 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - [x] T039 - Tulis logik saringan sasar-pengamatan CSS (opacity dimming) dalam kelas `.node-dimmed` & `.link-dimmed`.
 - [x] T040 - Menetapkan sifat peralihan visual (CSS transition) agar dimming berlaku secara anggun (graceful degradation).
 - [x] T041 - Integrasi Filter ke dalam export image layout (CSS embedded ke dalam ekspot PNG).
+- [x] T042 - Struktur semula senibina DOM panel utama HTML ke sub-unit (`.panel-header`, `.panel-core`, `.panel-secondary`).
+- [x] T043 - Tambah butang "Collapse/Expand Toggle" bersebelahan tajuk utama panel untuk penyembunyian bahagian sekunder (filter/legend).
+- [x] T044 - Bina logic javascript menukar display attribute dan local-storage (kekalkan layout setting reload page).
+- [x] T045 - Terap rekabentuk CSS transition untuk keadaan `.is-collapsed`.

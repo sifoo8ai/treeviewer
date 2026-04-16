@@ -563,8 +563,28 @@ function renderTree(familyName) {
         node.append("text").attr("class", "year-label").attr("text-anchor", "middle").attr("dy", 12).text(d => (d.data.year && d.data.year < 9999) ? `(${d.data.year})` : "");
 
         fitView(allNodes);
-    } catch (err) {
+        } catch (err) {
         console.error(err);
         displayError("Ralat struktur CSV: Gagal memadankan data hierarki keluarga.");
     }
+}
+
+// Collapsible Logic
+const toggleBtn = document.getElementById('togglePanelBtn');
+if(toggleBtn) {
+    const controlPanel = document.getElementById('controlPanel');
+    
+    // Load state from local storage
+    const isCollapsed = localStorage.getItem('treeViewerPanelCollapsed') === 'true';
+    if(isCollapsed) {
+        controlPanel.classList.add('is-collapsed');
+        toggleBtn.textContent = '+';
+    }
+    
+    toggleBtn.addEventListener('click', () => {
+        controlPanel.classList.toggle('is-collapsed');
+        const collapsedNow = controlPanel.classList.contains('is-collapsed');
+        toggleBtn.textContent = collapsedNow ? '+' : '−';
+        localStorage.setItem('treeViewerPanelCollapsed', collapsedNow);
+    });
 }
