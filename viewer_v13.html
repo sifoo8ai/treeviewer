@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <title>Family Tree Viewer v13 - Director's Cut</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f1f5f9; overflow: hidden; }
+        #canvas { width: 100vw; height: 100vh; cursor: grab; }
+        .controls { 
+            position: absolute; top: 20px; left: 20px; background: white; 
+            padding: 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            z-index: 100; border-top: 6px solid #007bff; width: 280px;
+        }
+        select, input[type="file"] { width: 100%; margin-top: 10px; padding: 8px; border-radius: 5px; border: 1px solid #cbd5e1; }
+        .node-rect { stroke-width: 2px; rx: 6; ry: 6; cursor: pointer; }
+        .waris-rect { fill: #ffffff; stroke: #007bff; }
+        .spouse-rect { fill: #fffbeb; stroke: #d97706; }
+        .deceased-rect { fill: #f1f5f9 !important; stroke: #64748b !important; }
+        .link { fill: none; stroke: #94a3b8; stroke-width: 2px; }
+        .marriage-line { stroke: #d97706; stroke-width: 2px; stroke-dasharray: 5,3; }
+        .name-label { font-size: 11px; font-weight: bold; fill: #1e293b; pointer-events: none; }
+        .year-label { font-size: 10px; fill: #3b82f6; font-weight: bold; pointer-events: none; }
+        .tooltip { position: absolute; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); display: none; z-index: 200; pointer-events: none; min-width: 240px; border: 1px solid #e2e8f0; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
+        .info-label { color: #64748b; font-weight: bold; }
+        
+        /* CREDIT STYLE */
+        .credit {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #64748b;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            z-index: 100;
+            pointer-events: none; /* Supaya tak kacau mouse drag */
+        }
+        .credit span { color: #007bff; }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <h3 style="margin:0; color:#007bff; font-size:18px;">Family Viewer v13</h3>
+    <label style="font-size:12px;">1. Upload Fail CSV:</label>
+    <input type="file" id="csvFile" accept=".csv">
+    
+    <div id="familySelector" style="display:none; margin-top:15px;">
+        <label style="font-size:12px;">2. Pilih Keluarga Utama:</label>
+        <select id="selectFamily"></select>
+    </div>
+    <p style="font-size:11px; color:#94a3b8; margin-top:20px;">
+        🖱️ <b>Scroll:</b> Zoom | 🖐️ <b>Drag:</b> Alih
+    </p>
+</div>
+
+<div class="credit">Disediakan oleh: <span>Jai Zero Cost Production</span></div>
+
+<div id="tooltip" class="tooltip"></div>
+<div id="canvas"></div>
+
+<script>
+    let globalData = [];
+    const width = window.innerWidth, height = window.innerHeight;
+    const svg = d3.select("#canvas").append("svg").attr("width", width).attr("height", height)
+        .on("click", () => d3.select("#tooltip").style("display", "none"));
+
+    const g = svg.append("g");
+    const zoom = d3.zoom().scaleExtent([0.05, 3]).on("zoom", (e) => g.attr("transform", e.transform));
+    svg.call(zoom);
+
+    function cleanStr(str) { return str ? str.replace(/[\u200B-\u200D\uFEFF\u2060]/g, "").trim() : ""; }
+
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const raw = d3.csvParse(event.target.result);
+            globalData = raw.map(row => {
+                const cleanedRow = {};
+                for (let key in row) { cleanedRow[cleanStr(key)] = cleanStr(row[key]); }
+                return cleanedRow;
+            });
+            const families = [...new Set(globalData.map(d => d["Keluarga Utama"]))].filter(f => f);
+            const selector = document.getElementById('selectFamily');
+            selector.innerHTML = families.map(f => `<option value="${f}">${f}</option>`).join('');
+            document.getElementById('familySelector').style.display = "block";
+            renderTree(selector.value);
+        };
+        reader.readAsText(file);
+    });
+
+    document.getElementById('selectFamily').addEventListener('change', (e) => renderTree(e.target.value));
+
+    function renderTree(familyName) {
+        g.selectAll("*").remove();
+        const filtered = globalData.filter(d => d["Keluarga Utama"] === familyName);
+        const nodesData = [{ id: "ROOT", name: familyName, parent: "", year: 1900, dob: "-", type: "waris" }];
+
+        filtered.forEach((d) => {
+            const rawName = d["Nama Penuh"];
+            if (!rawName) return;
+            
+            let birthYear = parseInt(d["Tahun Lahir"]);
+            if (isNaN(birthYear) && d["Tarikh Lahir"]) {
+                const match = d["Tarikh Lahir"].match(/\d{4}/);
+                if (match) birthYear = parseInt(match[0]);
+            }
+            if (isNaN(birthYear)) birthYear = 9999;
+
+            let parent = d["Nama Ibu / Bapa"];
+            if (!filtered.some(f => f["Nama Penuh"] === parent) || !parent) parent = "ROOT";
+
+            nodesData.push({
+                id: rawName, name: rawName, parent: parent,
+                year: birthYear, dob: d["Tarikh Lahir"] || "-",
+                status: d["Status Individu"], gen: d["Generasi"], loc: d["Lokasi Tempat Tinggal"], type: "waris"
+            });
+
+            if (d["Nama Pasangan"]) {
+                nodesData.push({
+                    id: rawName + "_S", name: d["Nama Pasangan"], parent: rawName,
+                    type: "spouse", status: d["Status Pasangan"],
+                    dob: d["Tarikh Lahir Pasangan"] || d["Tahun Lahir Pasangan"] || "-"
+                });
+            }
+        });
+
+        const root = d3.stratify().id(d => d.id).parentId(d => d.parent)(nodesData);
+        
+        root.eachBefore(node => {
+            if (node.children) {
+                node.children.sort((a, b) => (a.data.year || 9999) - (b.data.year || 9999));
+            }
+        });
+
+        const treeLayout = d3.tree().nodeSize([350, 400]);
+        treeLayout(root);
+
+        root.descendants().forEach(d => {
+            if (d.data.type === 'spouse') {
+                d.y = d.parent.y;
+                d.x = d.parent.x + 160;
+            }
+        });
+
+        g.selectAll(".link").data(root.links().filter(l => l.target.data.type === 'waris'))
+            .enter().append("path").attr("class", "link")
+            .attr("d", d => {
+                const s = d.source, t = d.target;
+                const midY = (s.y + t.y) / 2;
+                return `M${s.x},${s.y} L${s.x},${midY} L${t.x},${midY} L${t.x},${t.y}`;
+            });
+
+        g.selectAll(".marriage").data(root.links().filter(l => l.target.data.type === 'spouse'))
+            .enter().append("line").attr("class", "marriage-line")
+            .attr("x1", d => d.source.x + 75).attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x - 75).attr("y2", d => d.target.y);
+
+        const node = g.selectAll(".node").data(root.descendants()).enter().append("g")
+            .attr("transform", d => `translate(${d.x},${d.y})`)
+            .on("click", (event, d) => {
+                event.stopPropagation();
+                const t = d3.select("#tooltip");
+                t.style("display", "block").style("left", (event.pageX + 15) + "px").style("top", (event.pageY - 15) + "px")
+                 .html(`<strong>${d.data.name}</strong><hr><div class="info-row"><span class="info-label">Tarikh Lahir:</span><span>${d.data.dob}</span></div><div class="info-row"><span class="info-label">Generasi:</span><span>${d.data.gen || 'Pasangan'}</span></div><div class="info-row"><span class="info-label">Status:</span><span>${d.data.status || '-'}</span></div><div class="info-row"><span class="info-label">Lokasi:</span><span>${d.data.loc || '-'}</span></div>`);
+            });
+
+        node.append("rect").attr("class", d => `node-rect ${d.data.type==='spouse'?'spouse-rect':'waris-rect'} ${d.data.status?.includes('meninggal')?'deceased-rect':''}`)
+            .attr("x", -75).attr("y", -25).attr("width", 150).attr("height", 50);
+
+        node.append("text").attr("class", "name-label").attr("text-anchor", "middle").attr("dy", 2).text(d => d.data.name.length > 20 ? d.data.name.substring(0,18)+'..' : d.data.name);
+        node.append("text").attr("class", "year-label").attr("text-anchor", "middle").attr("dy", 15).text(d => (d.data.year && d.data.year < 9999) ? `(${d.data.year})` : "");
+
+        svg.call(zoom.transform, d3.zoomIdentity.translate(width/2, 100).scale(0.5));
+    }
+</script>
+</body>
+</html>
