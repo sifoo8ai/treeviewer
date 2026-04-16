@@ -7,6 +7,8 @@ const g = svg.append("g");
 const zoom = d3.zoom().scaleExtent([0.05, 3]).on("zoom", (e) => g.attr("transform", e.transform));
 svg.call(zoom);
 
+let currentNodes = []; // store for reset view
+
 function cleanStr(str) { return str ? str.replace(/[\u200B-\u200D\uFEFF\u2060]/g, "").trim() : ""; }
 
 document.getElementById('csvFile').addEventListener('change', function(e) {
@@ -30,10 +32,39 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
 
 document.getElementById('selectFamily').addEventListener('change', (e) => renderTree(e.target.value));
 
+if(document.getElementById('resetViewBtn')) {
+    document.getElementById('resetViewBtn').addEventListener('click', () => {
+        fitView(currentNodes);
+    });
+}
+
+function fitView(nodes) {
+    if (!nodes || nodes.length === 0) return;
+    
+    // Calculate bounding box
+    const padding = 50;
+    const xMin = d3.min(nodes, d => d.x - 60) - padding;
+    const xMax = d3.max(nodes, d => d.x + (d.isSpouseNode ? 60 : 60)) + padding;
+    const yMin = d3.min(nodes, d => d.y - 20) - padding;
+    const yMax = d3.max(nodes, d => d.y + 20) + padding;
+    
+    const w = xMax - xMin;
+    const h = yMax - yMin;
+    if (w <= 0 || h <= 0) return;
+
+    const scale = Math.min(width / w, height / h, 1.2);
+    const tx = width / 2 - (xMin + w / 2) * scale;
+    const ty = height / 2 - (yMin + h / 2) * scale;
+    
+    svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
 function renderTree(familyName) {
     g.selectAll("*").remove();
     const filtered = globalData.filter(d => d["Keluarga Utama"] === familyName);
-    const nodesData = [{ id: "ROOT", name: familyName, parent: "", year: 1900, dob: "-", type: "waris" }];
+    
+    const warisData = [{ id: "ROOT", name: familyName, parent: "", year: 1900, dob: "-", type: "waris" }];
+    const spouseData = [];
 
     filtered.forEach((d) => {
         const rawName = d["Nama Penuh"];
@@ -49,22 +80,22 @@ function renderTree(familyName) {
         let parent = d["Nama Ibu / Bapa"];
         if (!filtered.some(f => f["Nama Penuh"] === parent) || !parent) parent = "ROOT";
 
-        nodesData.push({
+        warisData.push({
             id: rawName, name: rawName, parent: parent,
             year: birthYear, dob: d["Tarikh Lahir"] || "-",
             status: d["Status Individu"], gen: d["Generasi"], loc: d["Lokasi Tempat Tinggal"], type: "waris"
         });
 
         if (d["Nama Pasangan"]) {
-            nodesData.push({
-                id: rawName + "_S", name: d["Nama Pasangan"], parent: rawName,
+            spouseData.push({
+                id: rawName + "_S", name: d["Nama Pasangan"], warisId: rawName,
                 type: "spouse", status: d["Status Pasangan"],
                 dob: d["Tarikh Lahir Pasangan"] || d["Tahun Lahir Pasangan"] || "-"
             });
         }
     });
 
-    const root = d3.stratify().id(d => d.id).parentId(d => d.parent)(nodesData);
+    const root = d3.stratify().id(d => d.id).parentId(d => d.parent)(warisData);
     
     root.eachBefore(node => {
         if (node.children) {
@@ -72,17 +103,37 @@ function renderTree(familyName) {
         }
     });
 
-    const treeLayout = d3.tree().nodeSize([350, 400]);
+    const treeLayout = d3.tree()
+        .nodeSize([180, 140])
+        .separation((a, b) => {
+            const aWider = spouseData.some(s => s.warisId === a.id);
+            const bWider = spouseData.some(s => s.warisId === b.id);
+            return (a.parent === b.parent ? 0.85 : 1.05) + ((aWider || bWider) ? 0.4 : 0);
+        });
+    
     treeLayout(root);
 
-    root.descendants().forEach(d => {
-        if (d.data.type === 'spouse') {
-            d.y = d.parent.y;
-            d.x = d.parent.x + 160;
+    let allNodes = root.descendants();
+    
+    // Attach spouses manually
+    spouseData.forEach(spouse => {
+        const warisNode = allNodes.find(n => n.id === spouse.warisId);
+        if (warisNode) {
+            allNodes.push({
+                id: spouse.id,
+                data: spouse,
+                x: warisNode.x + 130, // Offset to the right
+                y: warisNode.y,
+                parent: warisNode,
+                isSpouseNode: true
+            });
         }
     });
 
-    g.selectAll(".link").data(root.links().filter(l => l.target.data.type === 'waris'))
+    currentNodes = allNodes;
+
+    // Draw links for waris
+    g.selectAll(".link").data(root.links())
         .enter().append("path").attr("class", "link")
         .attr("d", d => {
             const s = d.source, t = d.target;
@@ -90,12 +141,14 @@ function renderTree(familyName) {
             return `M${s.x},${s.y} L${s.x},${midY} L${t.x},${midY} L${t.x},${t.y}`;
         });
 
-    g.selectAll(".marriage").data(root.links().filter(l => l.target.data.type === 'spouse'))
+    // Draw links for spouses
+    const marriageLinks = allNodes.filter(n => n.isSpouseNode).map(n => ({ source: n.parent, target: n }));
+    g.selectAll(".marriage").data(marriageLinks)
         .enter().append("line").attr("class", "marriage-line")
-        .attr("x1", d => d.source.x + 75).attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x - 75).attr("y2", d => d.target.y);
+        .attr("x1", d => d.source.x + 60).attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x - 60).attr("y2", d => d.target.y);
 
-    const node = g.selectAll(".node").data(root.descendants()).enter().append("g")
+    const node = g.selectAll(".node").data(allNodes).enter().append("g")
         .attr("transform", d => `translate(${d.x},${d.y})`)
         .on("click", (event, d) => {
             event.stopPropagation();
@@ -105,10 +158,10 @@ function renderTree(familyName) {
         });
 
     node.append("rect").attr("class", d => `node-rect ${d.data.type==='spouse'?'spouse-rect':'waris-rect'} ${d.data.status?.includes('meninggal')?'deceased-rect':''}`)
-        .attr("x", -75).attr("y", -25).attr("width", 150).attr("height", 50);
+        .attr("x", -60).attr("y", -20).attr("width", 120).attr("height", 40);
 
-    node.append("text").attr("class", "name-label").attr("text-anchor", "middle").attr("dy", 2).text(d => d.data.name.length > 20 ? d.data.name.substring(0,18)+'..' : d.data.name);
-    node.append("text").attr("class", "year-label").attr("text-anchor", "middle").attr("dy", 15).text(d => (d.data.year && d.data.year < 9999) ? `(${d.data.year})` : "");
+    node.append("text").attr("class", "name-label").attr("text-anchor", "middle").attr("dy", -2).text(d => d.data.name.length > 18 ? d.data.name.substring(0,16)+'..' : d.data.name);
+    node.append("text").attr("class", "year-label").attr("text-anchor", "middle").attr("dy", 12).text(d => (d.data.year && d.data.year < 9999) ? `(${d.data.year})` : "");
 
-    svg.call(zoom.transform, d3.zoomIdentity.translate(width/2, 100).scale(0.5));
+    fitView(allNodes);
 }

@@ -14,15 +14,17 @@
   * kekal format CSV
   * root folder `\TreeViewer`
 * Setup semula struktur projek (Pindah ke `index.html + styles.css + app.js`)
+* Refactor visual spouse: pisahkan spouse daripada hierarchy utama dan render sebagai linked node
+* Implement auto-fit / auto-center dengan margin, dan butang Reset View
+* Kecilkan node size, tambah offset, dan gunakan d3.tree().separation() untuk layout lebih padat
 
 ## Next
 
-* Selepas baseline stabil, teruskan compact layout dan spouse rendering refactor
+* Fasa Hardening: CSV validation, search, tooltip viewport-safe.
 
 ## Notes
 
-* Fokus utama sekarang ialah layout lebih padat seperti Family Echo
-* Jangan tambah feature luar scope terlalu awal
+* Fokus utama sekarang ialah kestabilan view, jangan tambah banyak library luar.
 * Keutamaan tinggi pada kestabilan data mapping dan readability layout
 
 ## Open Questions
@@ -38,10 +40,10 @@
 * Pastikan CSV flow kekal berfungsi (Completed)
 
 ## Fasa 2 — Layout Fix
-* compact spacing
-* spouse visual node
-* auto-fit
-* reset view
+* compact spacing (Completed)
+* spouse visual node (Completed)
+* auto-fit (Completed)
+* reset view (Completed)
 
 ## Fasa 3 — Hardening
 * CSV validation

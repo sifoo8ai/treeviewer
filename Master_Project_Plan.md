@@ -32,3 +32,22 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - **Maintain CSV Format**: Do not alter the expected column structure of the CSV data.
 - **Root Directory**: All files must reside in or be referenced from the project root (`\TreeViewer`).
 - **No additional planning docs**: Maintain updates strictly in this file and `CONTEXT.md`.
+
+## Task Breakdown
+- [x] T001 - Setup project structure dalam \TreeViewer
+- [x] T002 - Pindahkan viewer_v13 kepada struktur baru index.html + styles.css + app.js
+- [ ] T003 - Kekalkan parser CSV dengan format lama
+- [ ] T004 - Tambah CSV required-column validation
+- [ ] T005 - Tambah helper normalization untuk nama, parent, spouse
+- [ ] T006 - Refactor data mapping supaya parent-child hierarchy lebih stabil
+- [x] T007 - Buang spouse daripada hierarchy utama
+- [x] T008 - Render spouse sebagai visual attached node
+- [x] T009 - Kecilkan node size, spacing, spouse offset
+- [x] T010 - Tambah separation() untuk compact layout
+- [x] T011 - Tambah auto-fit dan auto-center berdasarkan bounding box
+- [ ] T012 - Tambah layout mode Compact / Standard
+- [ ] T013 - Kemaskan tooltip dan pastikan tak terkeluar viewport
+- [ ] T014 - Tambah error display yang jelas untuk CSV invalid
+- [x] T015 - Tambah butang Reset View
+- [ ] T016 - Ujian dengan CSV contoh sedia ada
+- [ ] T017 - Kemas dokumentasi ringkas untuk Gemini / maintainers
