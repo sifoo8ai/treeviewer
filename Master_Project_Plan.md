@@ -70,3 +70,8 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - [x] T034 - Asingkan section muat-naik dan section github API ikut paparan secara logikal.
 - [x] T035 - Bina Visual Indikator status loading agar memberitahu pengguna muatan sedang berjalan.
 - [x] T036 - Rencana UI Disable logic (halang interaksi user) semasa process CSV sedang berlaku untuk mencegah ralat rendering.
+- [x] T037 - Bina paparan struktur 'Legend Pokok' di bawah menu supaya mudah difahami warna/jenis nod.
+- [x] T038 - Tambah Dropdown 'Filter Status' (Semua / Hidup / Meninggal).
+- [x] T039 - Tulis logik saringan sasar-pengamatan CSS (opacity dimming) dalam kelas `.node-dimmed` & `.link-dimmed`.
+- [x] T040 - Menetapkan sifat peralihan visual (CSS transition) agar dimming berlaku secara anggun (graceful degradation).
+- [x] T041 - Integrasi Filter ke dalam export image layout (CSS embedded ke dalam ekspot PNG).

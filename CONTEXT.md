@@ -23,6 +23,7 @@
 * Disepadukan pautan Hosted Sample CSV menggunakan Github REST API supaya pengguna boleh melayari fail CSV terbuka dari folder repositori "sample-data" tanpa upload.
 * Menyediakan Radio Button Toggle untuk UX penukaran mode sumber data (Local/Sample) yang lebih baik berserta visual Status Loading.
 * Menambah fungsi "Export PNG" dengan membina salinan (clone) `<svg>` di atas entiti `<canvas>` dalam resolusi 2x bagi membolehkan pengguna memuat turun carta paparan.
+* Membina antaramuka *Legend* dan menambah ciri tetapan *Status Filter* (Hidup/Meninggal) berasaskan efek opacity dimming bagi memelihara ikatan D3 SVG render.
 
 ## Next
 

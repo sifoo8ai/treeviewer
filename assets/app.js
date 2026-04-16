@@ -14,6 +14,7 @@ svg.append("style").text(`
     .name-label { font-size: 10px; font-weight: bold; fill: #1e293b; font-family: sans-serif; pointer-events: none; }
     .year-label { font-size: 10px; fill: #3b82f6; font-weight: bold; font-family: sans-serif; pointer-events: none; }
     .node-highlight { stroke: #e11d48 !important; stroke-width: 4px !important; }
+    .node-dimmed, .link-dimmed { opacity: 0.15 !important; }
 `);
 
 const g = svg.append("g");
@@ -52,6 +53,11 @@ function resetState() {
     document.getElementById('searchInput').value = "";
     document.getElementById('searchResults').style.display = "none";
     document.getElementById('searchContainer').style.display = "none";
+    
+    const filterContainer = document.getElementById('filterContainer');
+    if (filterContainer) filterContainer.style.display = "none";
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) statusFilter.value = "all";
     
     document.getElementById('csvFile').value = "";
     const sampleSel = document.getElementById('sampleCsvSelector');
@@ -110,6 +116,8 @@ function processCsvData(rawText) {
     selector.innerHTML = families.map(f => `<option value="${f}">${f}</option>`).join('');
     document.getElementById('familySelector').style.display = "block";
     document.getElementById('searchContainer').style.display = "block";
+    const filterContainer = document.getElementById('filterContainer');
+    if (filterContainer) filterContainer.style.display = "block";
     renderTree(selector.value);
 }
 
@@ -352,6 +360,36 @@ function clearSearchHighlightOnly() {
     g.selectAll(".node-rect").classed("node-highlight", false);
 }
 
+// FILTER LOGIC
+if(document.getElementById('statusFilter')) {
+    document.getElementById('statusFilter').addEventListener('change', function(e) {
+        applyStatusFilter(e.target.value);
+    });
+}
+
+function applyStatusFilter(filterState) {
+    g.selectAll('.node').classed('node-dimmed', d => {
+        const isDeceased = normalizeText(d.data.status).includes('meninggal');
+        if (filterState === 'deceased' && !isDeceased) return true;
+        if (filterState === 'alive' && isDeceased) return true;
+        return false;
+    });
+    
+    g.selectAll('.link').classed('link-dimmed', d => {
+        const targetDeceased = normalizeText(d.target.data.status).includes('meninggal');
+        if (filterState === 'deceased' && !targetDeceased) return true;
+        if (filterState === 'alive' && targetDeceased) return true;
+        return false;
+    });
+
+    g.selectAll('.marriage-line').classed('link-dimmed', d => {
+        const targetDeceased = normalizeText(d.target.data.status).includes('meninggal');
+        if (filterState === 'deceased' && !targetDeceased) return true;
+        if (filterState === 'alive' && targetDeceased) return true;
+        return false;
+    });
+}
+
 function focusNode(id) {
     document.getElementById('searchResults').style.display = 'none';
 
@@ -374,6 +412,10 @@ function focusNode(id) {
 function renderTree(familyName) {
     g.selectAll("*").remove();
     clearSearchHighlightOnly();
+    if(document.getElementById('statusFilter')) {
+        document.getElementById('statusFilter').value = 'all';
+    }
+    
     const filtered = globalData.filter(d => d["Keluarga Utama"] === familyName);
     
     const warisData = [{ id: "ROOT", name: familyName, parent: "", year: 1900, dob: "-", type: "waris" }];
