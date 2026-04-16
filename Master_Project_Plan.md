@@ -63,3 +63,7 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - [x] T027 - Tapis response JSON API untuk `.csv` ke dalam fail senarai (dropdown)
 - [x] T028 - Ekstrak onload function file tempatan ke dalam processCsvData untuk kegunaan awam
 - [x] T029 - Benarkan fail CSV lokal dan sampel awam wujud serentak (reset mana yg tidak relevan)
+- [x] T033 - Tambah input radio toggle untuk memilih punca sumber data.
+- [x] T034 - Asingkan section muat-naik dan section github API ikut paparan secara logikal.
+- [x] T035 - Bina Visual Indikator status loading agar memberitahu pengguna muatan sedang berjalan.
+- [x] T036 - Rencana UI Disable logic (halang interaksi user) semasa process CSV sedang berlaku untuk mencegah ralat rendering.

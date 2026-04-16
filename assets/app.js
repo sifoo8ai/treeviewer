@@ -30,6 +30,48 @@ function hideError() {
     }
 }
 
+function resetState() {
+    g.selectAll("*").remove();
+    const familySelect = document.getElementById('selectFamily');
+    if (familySelect) familySelect.innerHTML = "";
+    document.getElementById('familySelector').style.display = "none";
+    
+    document.getElementById('searchInput').value = "";
+    document.getElementById('searchResults').style.display = "none";
+    document.getElementById('searchContainer').style.display = "none";
+    
+    document.getElementById('csvFile').value = "";
+    const sampleSel = document.getElementById('sampleCsvSelector');
+    if (sampleSel) sampleSel.value = "";
+    
+    hideError();
+}
+
+function setLoading(isLoading) {
+    const loader = document.getElementById('loadingIndicator');
+    if (loader) loader.style.display = isLoading ? "block" : "none";
+    
+    document.getElementById('selectFamily').disabled = isLoading;
+    document.getElementById('searchInput').disabled = isLoading;
+}
+
+// Data Source Toggle
+document.querySelectorAll('input[name="dataSource"]').forEach(radio => {
+    radio.addEventListener("change", (e) => {
+        const uploadSection = document.getElementById("uploadSection");
+        const sampleSection = document.getElementById("sampleSection");
+        if (e.target.value === "upload") {
+            uploadSection.style.display = "block";
+            sampleSection.style.display = "none";
+            resetState();
+        } else {
+            uploadSection.style.display = "none";
+            sampleSection.style.display = "block";
+            resetState();
+        }
+    });
+});
+
 function processCsvData(rawText) {
     const raw = d3.csvParse(rawText);
     if (raw.length === 0) return displayError("Fail CSV kosong.");
@@ -63,9 +105,17 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
     if (!file) return;
     const sampleSelector = document.getElementById('sampleCsvSelector');
     if (sampleSelector) sampleSelector.value = ""; // Reset sample dropdown
+    
+    setLoading(true);
     const reader = new FileReader();
     reader.onload = function(event) {
-        processCsvData(event.target.result);
+        setTimeout(() => {
+            try {
+                processCsvData(event.target.result);
+            } finally {
+                setLoading(false);
+            }
+        }, 50); // delay to allow UI to render loading state
     };
     reader.readAsText(file);
 });
@@ -108,11 +158,21 @@ document.getElementById('sampleCsvSelector').addEventListener('change', async fu
     document.getElementById('csvFile').value = ''; // Reset local file upload
     
     try {
+        setLoading(true);
         const res = await fetch(url);
         if(!res.ok) throw new Error('Network fail');
         const csvText = await res.text();
-        processCsvData(csvText);
+        
+        setTimeout(() => {
+            try {
+                processCsvData(csvText);
+            } finally {
+                setLoading(false);
+            }
+        }, 50);
+        
     } catch(err) {
+        setLoading(false);
         displayError("Gagal memuat fail sample.");
     }
 });
@@ -121,7 +181,16 @@ document.getElementById('sampleCsvSelector').addEventListener('change', async fu
 loadSampleCsvList();
 
 
-document.getElementById('selectFamily').addEventListener('change', (e) => renderTree(e.target.value));
+document.getElementById('selectFamily').addEventListener('change', (e) => {
+    setLoading(true);
+    setTimeout(() => {
+        try {
+            renderTree(e.target.value);
+        } finally {
+            setLoading(false);
+        }
+    }, 50);
+});
 
 if(document.getElementById('resetViewBtn')) {
     document.getElementById('resetViewBtn').addEventListener('click', () => {
