@@ -270,6 +270,7 @@ function renderTree(familyName) {
             .attr("x2", d => d.target.x - 60).attr("y2", d => d.target.y);
 
         const node = g.selectAll(".node").data(allNodes).enter().append("g")
+            .attr("class", "node")
             .attr("transform", d => `translate(${d.x},${d.y})`)
             .on("click", (event, d) => {
                 event.stopPropagation();
