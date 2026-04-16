@@ -104,11 +104,11 @@ function renderTree(familyName) {
     });
 
     const treeLayout = d3.tree()
-        .nodeSize([180, 140])
+        .nodeSize([200, 150])
         .separation((a, b) => {
             const aWider = spouseData.some(s => s.warisId === a.id);
             const bWider = spouseData.some(s => s.warisId === b.id);
-            return (a.parent === b.parent ? 0.9 : 1.1) + ((aWider || bWider) ? 0.45 : 0);
+            return (a.parent === b.parent ? 1.1 : 1.3) + ((aWider || bWider) ? 0.6 : 0);
         });
     
     treeLayout(root);

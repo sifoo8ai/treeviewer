@@ -51,6 +51,6 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - [x] T015 - Tambah butang Reset View
 - [ ] T016 - Ujian dengan CSV contoh sedia ada
 - [ ] T017 - Kemas dokumentasi ringkas untuk Gemini / maintainers
-- [ ] T018 - Ubah connector anak supaya turun dari tengah pasangan (family unit center)
-- [ ] T019 - Fine-tune spacing kecil untuk kurangkan overlap selepas perubahan connector
-- [ ] T020 - Ujian visual untuk family kecil dan family besar selepas couple-center connector
+- [x] T018 - Ubah connector anak supaya turun dari tengah pasangan (family unit center)
+- [x] T019 - Fine-tune spacing kecil untuk kurangkan overlap selepas perubahan connector
+- [x] T020 - Ujian visual untuk family kecil dan family besar selepas couple-center connector

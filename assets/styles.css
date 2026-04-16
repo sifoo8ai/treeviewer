@@ -12,7 +12,7 @@ select, input[type="file"] { width: 100%; margin-top: 10px; padding: 8px; border
 .deceased-rect { fill: #f1f5f9 !important; stroke: #64748b !important; }
 .link { fill: none; stroke: #94a3b8; stroke-width: 2px; }
 .marriage-line { stroke: #d97706; stroke-width: 2px; stroke-dasharray: 5,3; }
-.name-label { font-size: 11px; font-weight: bold; fill: #1e293b; pointer-events: none; }
+.name-label { font-size: 10px; font-weight: bold; fill: #1e293b; pointer-events: none; }
 .year-label { font-size: 10px; fill: #3b82f6; font-weight: bold; pointer-events: none; }
 .tooltip { position: absolute; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); display: none; z-index: 200; pointer-events: none; min-width: 240px; border: 1px solid #e2e8f0; }
 .info-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 12px; }
