@@ -108,12 +108,13 @@ function renderTree(familyName) {
         .separation((a, b) => {
             const aWider = spouseData.some(s => s.warisId === a.id);
             const bWider = spouseData.some(s => s.warisId === b.id);
-            return (a.parent === b.parent ? 0.85 : 1.05) + ((aWider || bWider) ? 0.4 : 0);
+            return (a.parent === b.parent ? 0.9 : 1.1) + ((aWider || bWider) ? 0.45 : 0);
         });
     
     treeLayout(root);
 
     let allNodes = root.descendants();
+    let familyCenters = {};
     
     // Attach spouses manually
     spouseData.forEach(spouse => {
@@ -127,6 +128,10 @@ function renderTree(familyName) {
                 parent: warisNode,
                 isSpouseNode: true
             });
+            familyCenters[spouse.warisId] = {
+                x: warisNode.x + 65,
+                y: warisNode.y
+            };
         }
     });
 
@@ -136,9 +141,12 @@ function renderTree(familyName) {
     g.selectAll(".link").data(root.links())
         .enter().append("path").attr("class", "link")
         .attr("d", d => {
-            const s = d.source, t = d.target;
-            const midY = (s.y + t.y) / 2;
-            return `M${s.x},${s.y} L${s.x},${midY} L${t.x},${midY} L${t.x},${t.y}`;
+            const fc = familyCenters[d.source.id];
+            const sX = fc ? fc.x : d.source.x;
+            const sY = fc ? fc.y : d.source.y;
+            const t = d.target;
+            const midY = (sY + t.y) / 2;
+            return `M${sX},${sY} L${sX},${midY} L${t.x},${midY} L${t.x},${t.y}`;
         });
 
     // Draw links for spouses

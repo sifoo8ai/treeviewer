@@ -17,6 +17,7 @@
 * Refactor visual spouse: pisahkan spouse daripada hierarchy utama dan render sebagai linked node
 * Implement auto-fit / auto-center dengan margin, dan butang Reset View
 * Kecilkan node size, tambah offset, dan gunakan d3.tree().separation() untuk layout lebih padat
+* Kemaskini litar penyambung anak (child connector) supaya jatuh lurus merentasi pasangan (family unit center) dari tengah.
 
 ## Next
 
@@ -44,6 +45,7 @@
 * spouse visual node (Completed)
 * auto-fit (Completed)
 * reset view (Completed)
+* couple-centered connector logic (Completed)
 
 ## Fasa 3 — Hardening
 * CSV validation
