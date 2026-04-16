@@ -3,6 +3,19 @@ const width = window.innerWidth, height = window.innerHeight;
 const svg = d3.select("#canvas").append("svg").attr("width", width).attr("height", height)
     .on("click", () => d3.select("#tooltip").style("display", "none"));
 
+// Add embedded styles for Export to PNG support
+svg.append("style").text(`
+    .node-rect { stroke-width: 2px; rx: 6; ry: 6; cursor: pointer; }
+    .waris-rect { fill: #ffffff; stroke: #007bff; }
+    .spouse-rect { fill: #fffbeb; stroke: #d97706; }
+    .deceased-rect { fill: #f1f5f9 !important; stroke: #64748b !important; }
+    .link { fill: none; stroke: #94a3b8; stroke-width: 2px; }
+    .marriage-line { stroke: #d97706; stroke-width: 2px; stroke-dasharray: 5,3; }
+    .name-label { font-size: 10px; font-weight: bold; fill: #1e293b; font-family: sans-serif; pointer-events: none; }
+    .year-label { font-size: 10px; fill: #3b82f6; font-weight: bold; font-family: sans-serif; pointer-events: none; }
+    .node-highlight { stroke: #e11d48 !important; stroke-width: 4px !important; }
+`);
+
 const g = svg.append("g");
 const zoom = d3.zoom().scaleExtent([0.05, 3]).on("zoom", (e) => g.attr("transform", e.transform));
 svg.call(zoom);
@@ -197,6 +210,85 @@ if(document.getElementById('resetViewBtn')) {
         clearSearchHighlightOnly();
         fitView(currentNodes);
     });
+}
+
+if(document.getElementById('exportBtn')) {
+    document.getElementById('exportBtn').addEventListener('click', exportToPNG);
+}
+
+function exportToPNG() {
+    if (!currentNodes || currentNodes.length === 0) return;
+    
+    setLoading(true);
+    setTimeout(() => {
+        try {
+            const padding = 50;
+            const xMin = d3.min(currentNodes, d => d.x - 60) - padding;
+            const xMax = d3.max(currentNodes, d => d.x + (d.isSpouseNode ? 60 : 60)) + padding;
+            const yMin = d3.min(currentNodes, d => d.y - 20) - padding;
+            const yMax = d3.max(currentNodes, d => d.y + 20) + padding;
+            
+            const w = xMax - xMin;
+            const h = yMax - yMin;
+
+            // Clone SVG
+            const svgNode = document.querySelector("#canvas svg").cloneNode(true);
+            const gNode = svgNode.querySelector("g");
+            gNode.setAttribute("transform", `translate(${-xMin}, ${-yMin})`);
+            svgNode.setAttribute("width", w);
+            svgNode.setAttribute("height", h);
+            svgNode.setAttribute("viewBox", `0 0 ${w} ${h}`);
+            
+            // Add a background rect explicitly so it's not transparent
+            const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            bg.setAttribute("width", "100%");
+            bg.setAttribute("height", "100%");
+            bg.setAttribute("fill", "#f8fafc"); // light background
+            svgNode.insertBefore(bg, svgNode.firstChild);
+
+            const serializer = new XMLSerializer();
+            let svgString = serializer.serializeToString(svgNode);
+
+            // Create image and draw to canvas
+            const img = new Image();
+            const svgBlob = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = function() {
+                const canvas = document.createElement("canvas");
+                // 2x scale for sharpness
+                canvas.width = w * 2;
+                canvas.height = h * 2;
+                const ctx = canvas.getContext("2d");
+                ctx.fillStyle = "#f8fafc";
+                ctx.fillRect(0, 0, canvas.width, canvas.height); // safety fill
+                ctx.scale(2, 2);
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
+                
+                const familySelection = document.getElementById('selectFamily').value;
+                let familyName = normalizeText(familySelection || "export");
+                familyName = familyName.replace(/\s+/g, '-');
+
+                const a = document.createElement("a");
+                a.download = `family-tree-${familyName}.png`;
+                a.href = canvas.toDataURL("image/png");
+                a.click();
+                setLoading(false);
+            };
+            img.onerror = function(err) {
+                console.error("Image load fail", err);
+                setLoading(false);
+                displayError("Gagal menukar SVG kepada PNG.");
+            };
+            img.src = url;
+
+        } catch (err) {
+            console.error(err);
+            setLoading(false);
+            displayError("Gagal mengeksport PNG.");
+        }
+    }, 100);
 }
 
 function fitView(nodes) {

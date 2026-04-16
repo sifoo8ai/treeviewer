@@ -63,6 +63,9 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - [x] T027 - Tapis response JSON API untuk `.csv` ke dalam fail senarai (dropdown)
 - [x] T028 - Ekstrak onload function file tempatan ke dalam processCsvData untuk kegunaan awam
 - [x] T029 - Benarkan fail CSV lokal dan sampel awam wujud serentak (reset mana yg tidak relevan)
+- [x] T030 - Tambah butang Export PNG di panel kiri UI.
+- [x] T031 - Membina rekaan clone SVG menggunakan canvas dengan padanan ukuran dan latar belakang resolusi tinggi (skala 2x).
+- [x] T032 - Terap gaya CSS sebaris (inline/style block) ke dalam DOM SVG supaya rekabentuk kekal semasa eksport.
 - [x] T033 - Tambah input radio toggle untuk memilih punca sumber data.
 - [x] T034 - Asingkan section muat-naik dan section github API ikut paparan secara logikal.
 - [x] T035 - Bina Visual Indikator status loading agar memberitahu pengguna muatan sedang berjalan.
