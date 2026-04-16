@@ -30,39 +30,96 @@ function hideError() {
     }
 }
 
+function processCsvData(rawText) {
+    const raw = d3.csvParse(rawText);
+    if (raw.length === 0) return displayError("Fail CSV kosong.");
+    
+    const requiredCols = ["Keluarga Utama", "Nama Penuh", "Nama Ibu / Bapa"];
+    const missingCols = requiredCols.filter(c => !raw.columns.includes(c));
+    if (missingCols.length > 0) {
+        d3.select("#familySelector").style("display", "none");
+        d3.select("#searchContainer").style("display", "none");
+        g.selectAll("*").remove(); // Clear tree
+        return displayError("Ralat Fail CSV: Kolum wajib tidak dijumpai - " + missingCols.join(", "));
+    }
+    
+    hideError();
+
+    globalData = raw.map(row => {
+        const cleanedRow = {};
+        for (let key in row) { cleanedRow[cleanStr(key)] = cleanStr(row[key]); }
+        return cleanedRow;
+    });
+    const families = [...new Set(globalData.map(d => d["Keluarga Utama"]))].filter(f => f);
+    const selector = document.getElementById('selectFamily');
+    selector.innerHTML = families.map(f => `<option value="${f}">${f}</option>`).join('');
+    document.getElementById('familySelector').style.display = "block";
+    document.getElementById('searchContainer').style.display = "block";
+    renderTree(selector.value);
+}
+
 document.getElementById('csvFile').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
+    const sampleSelector = document.getElementById('sampleCsvSelector');
+    if (sampleSelector) sampleSelector.value = ""; // Reset sample dropdown
     const reader = new FileReader();
     reader.onload = function(event) {
-        const raw = d3.csvParse(event.target.result);
-        if (raw.length === 0) return displayError("Fail CSV kosong.");
-        
-        const requiredCols = ["Keluarga Utama", "Nama Penuh", "Nama Ibu / Bapa"];
-        const missingCols = requiredCols.filter(c => !raw.columns.includes(c));
-        if (missingCols.length > 0) {
-            d3.select("#familySelector").style("display", "none");
-            d3.select("#searchContainer").style("display", "none");
-            g.selectAll("*").remove(); // Clear tree
-            return displayError("Ralat Fail CSV: Kolum wajib tidak dijumpai - " + missingCols.join(", "));
-        }
-        
-        hideError();
-
-        globalData = raw.map(row => {
-            const cleanedRow = {};
-            for (let key in row) { cleanedRow[cleanStr(key)] = cleanStr(row[key]); }
-            return cleanedRow;
-        });
-        const families = [...new Set(globalData.map(d => d["Keluarga Utama"]))].filter(f => f);
-        const selector = document.getElementById('selectFamily');
-        selector.innerHTML = families.map(f => `<option value="${f}">${f}</option>`).join('');
-        document.getElementById('familySelector').style.display = "block";
-        document.getElementById('searchContainer').style.display = "block";
-        renderTree(selector.value);
+        processCsvData(event.target.result);
     };
     reader.readAsText(file);
 });
+
+async function loadSampleCsvList() {
+    const listEl = document.getElementById('sampleCsvSelector');
+    if (!listEl) return;
+    try {
+        const res = await fetch('https://api.github.com/repos/sifoo8ai/treeviewer/contents/sample-data');
+        if (!res.ok) {
+            if(res.status === 404) {
+                 listEl.innerHTML = '<option value="">(Folder sample tak ditemui)</option>';
+                 return;
+            }
+            throw new Error('API Ralat');
+        }
+        const data = await res.json();
+        const csvFiles = data.filter(item => item.type === 'file' && item.name.endsWith('.csv'));
+        if (csvFiles.length === 0) {
+            listEl.innerHTML = '<option value="">Tiada fail sample.</option>';
+            return;
+        }
+        
+        let options = '<option value="">-- Pilih Sample --</option>';
+        csvFiles.forEach(f => {
+            options += `<option value="${f.download_url}">${f.name}</option>`;
+        });
+        listEl.innerHTML = options;
+        
+    } catch(err) {
+        console.error(err);
+        listEl.innerHTML = '<option value="">Gagal memuat senarai.</option>';
+    }
+}
+
+document.getElementById('sampleCsvSelector').addEventListener('change', async function(e) {
+    const url = e.target.value;
+    if(!url) return;
+    
+    document.getElementById('csvFile').value = ''; // Reset local file upload
+    
+    try {
+        const res = await fetch(url);
+        if(!res.ok) throw new Error('Network fail');
+        const csvText = await res.text();
+        processCsvData(csvText);
+    } catch(err) {
+        displayError("Gagal memuat fail sample.");
+    }
+});
+
+// Load sample list on startup
+loadSampleCsvList();
+
 
 document.getElementById('selectFamily').addEventListener('change', (e) => renderTree(e.target.value));
 

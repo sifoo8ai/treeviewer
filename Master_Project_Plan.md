@@ -58,3 +58,8 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - [x] T022 - Bina logik padanan teks "normalizeText" bagi mengesan hasil carian.
 - [x] T023 - Guna auto-pan dan transform ke kedudukan node (focus) sekiranya pilihan diklik.
 - [x] T024 - Warnakan kotak nod sebagai di-highlight bagi identifikasi pantas.
+- [x] T025 - Tambah dropdown `sampleCsvSelector` di UI
+- [x] T026 - Tulis logic loadSampleCsvList guna utiliti fetch (Github API)
+- [x] T027 - Tapis response JSON API untuk `.csv` ke dalam fail senarai (dropdown)
+- [x] T028 - Ekstrak onload function file tempatan ke dalam processCsvData untuk kegunaan awam
+- [x] T029 - Benarkan fail CSV lokal dan sampel awam wujud serentak (reset mana yg tidak relevan)

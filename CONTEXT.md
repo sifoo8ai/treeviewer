@@ -20,6 +20,7 @@
 * Kemaskini litar penyambung anak (child connector) supaya jatuh lurus merentasi pasangan (family unit center) dari tengah.
 * Hardening: CSV validation untuk kolum wajib, text normalization (nama, parent, status kematian), dan tooltip viewport-safe.
 * Menambah Carian Nama dan fokus zoom kepada individu, berserta highlight node.
+* Disepadukan pautan Hosted Sample CSV menggunakan Github REST API supaya pengguna boleh melayari fail CSV terbuka dari folder repositori "sample-data" tanpa upload.
 
 ## Next
 

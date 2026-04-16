@@ -10,8 +10,12 @@
 
 <div class="controls">
     <h3 style="margin:0; color:#007bff; font-size:18px;">Family Viewer v13</h3>
-    <label style="font-size:12px;">1. Upload Fail CSV:</label>
+    <label style="font-size:12px; margin-top:10px; display:block;">1a. Upload Fail CSV:</label>
     <input type="file" id="csvFile" accept=".csv">
+    <label style="font-size:12px; margin-top:10px; display:block;">1b. Atau Pilih Sample:</label>
+    <select id="sampleCsvSelector">
+        <option value="">-- Memuat senarai... --</option>
+    </select>
     <div id="errorMsg" style="display:none; margin-top:15px; color: #dc3545; font-size: 12px; font-weight: bold; background: #f8d7da; padding: 10px; border-radius: 5px; border: 1px solid #f5c6cb;"></div>    
     <div id="familySelector" style="display:none; margin-top:15px;">
         <label style="font-size:12px;">2. Pilih Keluarga Utama:</label>
