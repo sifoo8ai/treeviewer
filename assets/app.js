@@ -42,6 +42,7 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
         const missingCols = requiredCols.filter(c => !raw.columns.includes(c));
         if (missingCols.length > 0) {
             d3.select("#familySelector").style("display", "none");
+            d3.select("#searchContainer").style("display", "none");
             g.selectAll("*").remove(); // Clear tree
             return displayError("Ralat Fail CSV: Kolum wajib tidak dijumpai - " + missingCols.join(", "));
         }
@@ -57,6 +58,7 @@ document.getElementById('csvFile').addEventListener('change', function(e) {
         const selector = document.getElementById('selectFamily');
         selector.innerHTML = families.map(f => `<option value="${f}">${f}</option>`).join('');
         document.getElementById('familySelector').style.display = "block";
+        document.getElementById('searchContainer').style.display = "block";
         renderTree(selector.value);
     };
     reader.readAsText(file);
@@ -66,6 +68,7 @@ document.getElementById('selectFamily').addEventListener('change', (e) => render
 
 if(document.getElementById('resetViewBtn')) {
     document.getElementById('resetViewBtn').addEventListener('click', () => {
+        clearSearchHighlightOnly();
         fitView(currentNodes);
     });
 }
@@ -91,8 +94,68 @@ function fitView(nodes) {
     svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
 }
 
+// SEARCH LOGIC
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const query = normalizeText(e.target.value);
+    const resultsContainer = document.getElementById('searchResults');
+    
+    if(!query) {
+        clearSearch();
+        return;
+    }
+    
+    const matches = currentNodes.filter(n => normalizeText(n.data.name).includes(query));
+    if(matches.length > 0) {
+        resultsContainer.innerHTML = matches.map(n => `<li data-id="${n.id}">${n.data.name} ${n.isSpouseNode ? '(Pasangan)' : ''}</li>`).join('');
+        resultsContainer.style.display = 'block';
+        
+        // Add click events to li
+        resultsContainer.querySelectorAll('li').forEach(li => {
+            li.addEventListener('click', () => {
+                focusNode(li.getAttribute('data-id'));
+            });
+        });
+    } else {
+        resultsContainer.innerHTML = '<li style="color:#94a3b8;">Tiada padanan.</li>';
+        resultsContainer.style.display = 'block';
+    }
+});
+
+document.getElementById('clearSearchBtn').addEventListener('click', clearSearch);
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('searchResults').innerHTML = '';
+    clearSearchHighlightOnly();
+}
+
+function clearSearchHighlightOnly() {
+    g.selectAll(".node-rect").classed("node-highlight", false);
+}
+
+function focusNode(id) {
+    document.getElementById('searchResults').style.display = 'none';
+
+    // finding the node
+    const targetNode = currentNodes.find(n => n.id === id);
+    if(!targetNode) return;
+
+    // highlight
+    clearSearchHighlightOnly();
+    g.selectAll(".node").filter(d => d.id === id).select(".node-rect").classed("node-highlight", true);
+
+    // transform
+    const scale = 1.3;
+    const tx = width / 2 - targetNode.x * scale;
+    const ty = height / 2 - targetNode.y * scale;
+
+    svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+}
+
 function renderTree(familyName) {
     g.selectAll("*").remove();
+    clearSearchHighlightOnly();
     const filtered = globalData.filter(d => d["Keluarga Utama"] === familyName);
     
     const warisData = [{ id: "ROOT", name: familyName, parent: "", year: 1900, dob: "-", type: "waris" }];

@@ -19,10 +19,11 @@
 * Kecilkan node size, tambah offset, dan gunakan d3.tree().separation() untuk layout lebih padat
 * Kemaskini litar penyambung anak (child connector) supaya jatuh lurus merentasi pasangan (family unit center) dari tengah.
 * Hardening: CSV validation untuk kolum wajib, text normalization (nama, parent, status kematian), dan tooltip viewport-safe.
+* Menambah Carian Nama dan fokus zoom kepada individu, berserta highlight node.
 
 ## Next
 
-* Pengujian penuh susanan layout (Compact vs Standard) dan carian jika diperlukan.
+* Pengujian penuh susanan layout (Compact vs Standard).
 
 ## Notes
 

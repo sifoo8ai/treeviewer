@@ -54,3 +54,7 @@ To develop a web-based Family Tree Viewer using vanilla HTML, CSS, and JS (D3.js
 - [x] T018 - Ubah connector anak supaya turun dari tengah pasangan (family unit center)
 - [x] T019 - Fine-tune spacing kecil untuk kurangkan overlap selepas perubahan connector
 - [x] T020 - Ujian visual untuk family kecil dan family besar selepas couple-center connector
+- [x] T021 - Tambah input carian nama di panel UI.
+- [x] T022 - Bina logik padanan teks "normalizeText" bagi mengesan hasil carian.
+- [x] T023 - Guna auto-pan dan transform ke kedudukan node (focus) sekiranya pilihan diklik.
+- [x] T024 - Warnakan kotak nod sebagai di-highlight bagi identifikasi pantas.
