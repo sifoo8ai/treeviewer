@@ -18,10 +18,11 @@
 * Implement auto-fit / auto-center dengan margin, dan butang Reset View
 * Kecilkan node size, tambah offset, dan gunakan d3.tree().separation() untuk layout lebih padat
 * Kemaskini litar penyambung anak (child connector) supaya jatuh lurus merentasi pasangan (family unit center) dari tengah.
+* Hardening: CSV validation untuk kolum wajib, text normalization (nama, parent, status kematian), dan tooltip viewport-safe.
 
 ## Next
 
-* Fasa Hardening: CSV validation, search, tooltip viewport-safe.
+* Pengujian penuh susanan layout (Compact vs Standard) dan carian jika diperlukan.
 
 ## Notes
 
@@ -48,7 +49,7 @@
 * couple-centered connector logic (Completed)
 
 ## Fasa 3 — Hardening
-* CSV validation
-* normalization nama
-* tooltip viewport-safe
+* CSV validation (Completed)
+* normalization nama (Completed)
+* tooltip viewport-safe (Completed)
 * layout mode compact/standard
