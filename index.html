@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Family Tree Viewer v13 - Director's Cut</title>
+    <title>Mohd Salleh Legacy</title>
     <link rel="stylesheet" href="assets/styles.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
@@ -13,77 +13,93 @@
     <div id="controlPanel" class="controls expanded">
         <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
             <h3 style="margin:0; color:#007bff; font-size:18px;">Family Tree Viewer</h3>
-            <button id="togglePanelBtn" type="button" style="background:#e2e8f0; border:none; border-radius:3px; cursor:pointer; font-weight:bold; padding:2px 8px;">−</button>
+            <button id="togglePanelBtn" type="button"
+                style="background:#e2e8f0; border:none; border-radius:3px; cursor:pointer; font-weight:bold; padding:2px 8px;">−</button>
         </div>
 
         <div class="panel-core-controls">
-        <div class="data-source" style="margin-top:15px; font-size:13px; font-weight:bold; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">
-            <label style="margin-right:10px; cursor:pointer;"><input type="radio" name="dataSource" value="upload" checked> Upload CSV</label>
-            <label style="cursor:pointer;"><input type="radio" name="dataSource" value="sample"> Hosted Data</label>
-        </div>
-
-        <div id="uploadSection" style="margin-top:10px;">
-            <input type="file" id="csvFile" accept=".csv">
-        </div>
-
-        <div id="sampleSection" style="display:none; margin-top:10px;">
-            <select id="sampleCsvSelector">
-                <option value="">-- Memuat senarai... --</option>
-            </select>
-        </div>
-        
-        <div id="loadingIndicator" class="loading" style="display:none;">⏳ Loading data...</div>
-        <div id="errorMsg"
-            style="display:none; margin-top:15px; color: #dc3545; font-size: 12px; font-weight: bold; background: #f8d7da; padding: 10px; border-radius: 5px; border: 1px solid #f5c6cb;">
-        </div>
-        <div id="familySelector" style="display:none; margin-top:15px;">
-            <label style="font-size:12px;">2. Pilih Keluarga Utama:</label>
-            <select id="selectFamily"></select>
-            <div style="display:flex; gap:5px; margin-top:10px;">
-                <button id="resetViewBtn" style="flex:1; padding: 8px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Reset View</button>
-                <button id="exportBtn" style="flex:1; padding: 8px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Export PNG</button>
+            <div class="data-source"
+                style="margin-top:15px; font-size:13px; font-weight:bold; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">
+                <label style="margin-right:10px; cursor:pointer;"><input type="radio" name="dataSource" value="upload"
+                        checked> Upload CSV</label>
+                <label style="cursor:pointer;"><input type="radio" name="dataSource" value="sample"> Hosted Data</label>
             </div>
-        </div>
 
-        <div id="searchContainer"
-            style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0;">
-            <label style="font-size:12px;">3. Cari Nama:</label>
-            <div style="display: flex; gap: 5px; margin-top: 5px;">
-                <input type="text" id="searchInput" placeholder="Zarul..." style="flex:1; margin-top:0;">
-                <button id="clearSearchBtn"
-                    style="padding: 8px; background: #64748b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">X</button>
+            <div id="uploadSection" style="margin-top:10px;">
+                <input type="file" id="csvFile" accept=".csv">
             </div>
-            <ul id="searchResults"
-                style="list-style: none; padding: 0; margin: 5px 0 0 0; max-height: 150px; overflow-y: auto; background: white; border:1px solid #cbd5e1; border-radius: 5px; display: none;">
-            </ul>
-        </div>
+
+            <div id="sampleSection" style="display:none; margin-top:10px;">
+                <select id="sampleCsvSelector">
+                    <option value="">-- Memuat senarai... --</option>
+                </select>
+            </div>
+
+            <div id="loadingIndicator" class="loading" style="display:none;">⏳ Loading data...</div>
+            <div id="errorMsg"
+                style="display:none; margin-top:15px; color: #dc3545; font-size: 12px; font-weight: bold; background: #f8d7da; padding: 10px; border-radius: 5px; border: 1px solid #f5c6cb;">
+            </div>
+            <div id="familySelector" style="display:none; margin-top:15px;">
+                <label style="font-size:12px;">2. Pilih Keluarga Utama:</label>
+                <select id="selectFamily"></select>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <button id="resetViewBtn"
+                        style="flex:1; padding: 8px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Reset
+                        View</button>
+                    <button id="exportBtn"
+                        style="flex:1; padding: 8px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Export
+                        PNG</button>
+                </div>
+            </div>
+
+            <div id="searchContainer"
+                style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0;">
+                <label style="font-size:12px;">3. Cari Nama:</label>
+                <div style="display: flex; gap: 5px; margin-top: 5px;">
+                    <input type="text" id="searchInput" placeholder="taip sini.." style="flex:1; margin-top:0;">
+                    <button id="clearSearchBtn"
+                        style="padding: 8px; background: #64748b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">X</button>
+                </div>
+                <ul id="searchResults"
+                    style="list-style: none; padding: 0; margin: 5px 0 0 0; max-height: 150px; overflow-y: auto; background: white; border:1px solid #cbd5e1; border-radius: 5px; display: none;">
+                </ul>
+            </div>
         </div> <!-- end panel-core-controls -->
 
         <div class="panel-secondary-controls">
-        <div id="filterContainer" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0;">
-            <label style="font-size:12px;">4. Filter Status:</label>
-            <select id="statusFilter" style="width:100%; margin-top:5px; padding:5px; border-radius:5px; border:1px solid #cbd5e1; font-size:13px;">
-                <option value="all">Semua</option>
-                <option value="alive">Masih Hidup</option>
-                <option value="deceased">Meninggal Sahaja</option>
-            </select>
-            
-            <div id="legendBox" style="margin-top:15px; font-size:11px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px;">
-                <div style="font-weight:bold; margin-bottom:5px;">Petunjuk:</div>
-                <div style="display:flex; align-items:center; margin-bottom:4px;">
-                    <span style="width:12px; height:12px; display:inline-block; border:2px solid #007bff; background:#ffffff; margin-right:6px; border-radius:2px;"></span> Waris Utama
-                </div>
-                <div style="display:flex; align-items:center; margin-bottom:4px;">
-                    <span style="width:12px; height:12px; display:inline-block; border:2px solid #d97706; background:#fffbeb; margin-right:6px; border-radius:2px;"></span> Pasangan
-                </div>
-                <div style="display:flex; align-items:center; margin-bottom:4px;">
-                    <span style="width:12px; height:12px; display:inline-block; border:2px solid #64748b; background:#f1f5f9; margin-right:6px; border-radius:2px;"></span> Meninggal Dunia
+            <div id="filterContainer"
+                style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0;">
+                <label style="font-size:12px;">4. Filter Status:</label>
+                <select id="statusFilter"
+                    style="width:100%; margin-top:5px; padding:5px; border-radius:5px; border:1px solid #cbd5e1; font-size:13px;">
+                    <option value="all">Semua</option>
+                    <option value="alive">Masih Hidup</option>
+                    <option value="deceased">Meninggal Sahaja</option>
+                </select>
+
+                <div id="legendBox"
+                    style="margin-top:15px; font-size:11px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:5px;">
+                    <div style="font-weight:bold; margin-bottom:5px;">Petunjuk:</div>
+                    <div style="display:flex; align-items:center; margin-bottom:4px;">
+                        <span
+                            style="width:12px; height:12px; display:inline-block; border:2px solid #007bff; background:#ffffff; margin-right:6px; border-radius:2px;"></span>
+                        Waris Utama
+                    </div>
+                    <div style="display:flex; align-items:center; margin-bottom:4px;">
+                        <span
+                            style="width:12px; height:12px; display:inline-block; border:2px solid #d97706; background:#fffbeb; margin-right:6px; border-radius:2px;"></span>
+                        Pasangan
+                    </div>
+                    <div style="display:flex; align-items:center; margin-bottom:4px;">
+                        <span
+                            style="width:12px; height:12px; display:inline-block; border:2px solid #64748b; background:#f1f5f9; margin-right:6px; border-radius:2px;"></span>
+                        Meninggal Dunia
+                    </div>
                 </div>
             </div>
-        </div>
-        <p style="font-size:11px; color:#94a3b8; margin-top:20px;">
-            🖱️ <b>Scroll:</b> Zoom | 🖐️ <b>Drag:</b> Alih
-        </p>
+            <p style="font-size:11px; color:#94a3b8; margin-top:20px;">
+                🖱️ <b>Scroll:</b> Zoom | 🖐️ <b>Drag:</b> Alih
+            </p>
         </div> <!-- end panel-secondary-controls -->
     </div>
 
